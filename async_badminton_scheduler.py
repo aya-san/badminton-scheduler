@@ -3,7 +3,7 @@ import random
 import itertools
 from collections import defaultdict
 
-st.set_page_config(page_title="非同期バドミントンスケジューラー", layout="centered")
+st.set_page_config(page_title="非同期バドスケジューラー", layout="centered")
 
 DEFAULT_PLAYERS = [f"Player {i+1}" for i in range(20)]
 DEFAULT_COURTS = 3
