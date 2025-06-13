@@ -3,19 +3,18 @@ import random
 import itertools
 from collections import defaultdict
 
-st.set_page_config(page_title="非同期バドスケジューラー", layout="centered")
+st.set_page_config(page_title="バドスケ", layout="centered")
 
 DEFAULT_PLAYERS = [f"Player {i+1}" for i in range(20)]
 DEFAULT_COURTS = 3
 
-st.title("🏸 非同期ダブルススケジューラー（コート別試合開始）")
+st.title("🏸 バドミントンスケジューラー")
 
 players_input = st.text_area("プレイヤー名（1人1行）", "\n".join(DEFAULT_PLAYERS))
 court_count = st.number_input("コート数", min_value=1, max_value=10, value=DEFAULT_COURTS)
 
 players = [p.strip() for p in players_input.split("\n") if p.strip()]
 
-# セッション管理
 if 'history' not in st.session_state:
     st.session_state.history = defaultdict(int)
 if 'current_matches' not in st.session_state:
@@ -44,13 +43,14 @@ def generate_match():
         return ((group[0], group[1]), (group[2], group[3]))
     return None
 
-# 各コートごとに表示
+# 各コートの表示と操作
 for court_id in range(court_count):
     st.subheader(f"🟩 コート {court_id + 1}")
     col1, col2 = st.columns([1, 3])
 
+    # 試合開始ボタン
     with col1:
-        if st.button(f"試合開始（コート {court_id + 1}）", key=f"start_{court_id}"):
+        if st.button(f"🎮 試合開始（コート {court_id + 1}）", key=f"start_{court_id}"):
             match = generate_match()
             if match:
                 team1, team2 = match
@@ -61,15 +61,19 @@ for court_id in range(court_count):
             else:
                 st.warning("プレイ可能な人数が足りません")
 
+    # 試合表示と終了ボタン
     with col2:
         match = st.session_state.current_matches[court_id]
         if match:
             t1, t2 = match
-            st.markdown(f"🎮 **{t1[0]} & {t1[1]}** vs **{t2[0]} & {t2[1]}**")
+            st.markdown(f"✅ **{t1[0]} & {t1[1]}** vs **{t2[0]} & {t2[1]}**")
+            if st.button(f"🛑 試合終了（コート {court_id + 1}）", key=f"end_{court_id}"):
+                st.session_state.current_matches[court_id] = None
+                st.success(f"コート {court_id + 1} を空きに戻しました")
         else:
             st.markdown("⏸️ 試合未実施")
 
-# 履歴表示
+# 試合履歴
 with st.expander("📜 試合履歴"):
     for i, (court, team1, team2) in enumerate(st.session_state.match_log, 1):
         st.write(f"{i}. コート{court}: {team1[0]} & {team1[1]} vs {team2[0]} & {team2[1]}")
